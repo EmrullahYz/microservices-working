@@ -2,9 +2,14 @@ package com.example.rest.webservices.restfullwebservices.controller;
 
 import com.example.rest.webservices.restfullwebservices.bean.User;
 import com.example.rest.webservices.restfullwebservices.dao.UserDaoService;
+import com.example.rest.webservices.restfullwebservices.exceptions.UserNotFoundException;
+import jakarta.servlet.Servlet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -21,12 +26,20 @@ public class UserController {
 
     @GetMapping(path = "/users/{id}")
     public User getUserById(@PathVariable int id){
-        return service.findOne(id);
+        User selectedUser = service.findOne(id);
+        if(selectedUser == null)
+            throw new UserNotFoundException("id :" + id);
+        return selectedUser;
     }
 
     @PostMapping("/users")
-    public void createUser(@RequestBody User user){
-        service.saveUser(user);
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        User savedUser = service.saveUser(user);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedUser.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
     }
 
 }
