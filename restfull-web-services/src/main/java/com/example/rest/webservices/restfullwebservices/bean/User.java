@@ -36,4 +36,10 @@ public class User {
     @OneToMany (mappedBy = "user")
     @JsonIgnore
     private List<Post> posts;
+
+    public User(Integer id, String userName, LocalDate birthDay) {
+        this.id = id;
+        this.userName = userName;
+        this.birthDay = birthDay;
+    }
 }
